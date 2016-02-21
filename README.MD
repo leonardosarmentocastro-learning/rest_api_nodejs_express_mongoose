@@ -216,3 +216,29 @@ ______
       });
   </code>
 
+______
+# Part 3.3
+
+  # We are going to add an route that gives us only one result of book by giving its id, and its URL should looks like:
+  # 'localhost:8000/api/books/:bookId' or 'localhost:8000/api/books/16516161561561'
+
+  # Go to your 'app.js' and just after the '/books' route, add the following code:
+  <code>
+    bookRouter.route('/books/:bookId')
+      .get(function(req, res) {
+        var bookId = req.params.bookId; // example of ObjectId(type of id used by MongoDB): 56c9d11d3b6c8e7e9977b55d
+        Book.findById(bookId, function (err, book) {
+          if(err) {
+            res.status(500).send(err);
+          } else {
+            res.json(book);
+          }
+        });
+      });
+  </code>
+
+  # Then go to your browser and navigate to: 'localhost:8000/api/books/56c9d11d3b6c8e7e9977b55d'
+  # To get an different ObjectId, go to your console and type "mongo" to open the mongo shell and then write
+  > new ObjectId();
+
+  # And copy and paste it
