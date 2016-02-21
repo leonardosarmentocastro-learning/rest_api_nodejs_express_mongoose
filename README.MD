@@ -124,4 +124,95 @@ _____
   > npm install mongoose --save
 
 
-  # The first thing we have to do, is to connect with our MongoDB
+  # The first thing we have to do, is to connect with our MongoDB and add a Model, which is going to be the json file
+  # that mongoose will use to translate the book object for us from the database.
+  # go to 'book_api/app.js' and do it:
+  <code>
+    var express = require('express'),
+    mongoose = require('mongoose'); // IMPORTANT: dont forget to add mongoose lib
+
+
+    var db = mongoose.connect("mongodb://localhost/bookAPI");
+    var Book = require('./models/bookModel');
+
+    // var app = express();
+    // var port = process.env.PORT || 3000;
+  </code>
+
+  # Go inside 'book_api/' directory and then create a folder named "models" and a file named 'bookModel.js' inside it:
+  > cd book_api #if you have not done that already before
+  > mkdir models
+  > touch models/bookModel.js
+
+
+  # Go ahead and create the mongoose model 'Book':
+  <code>
+    var mongoose = require('mongoose'),
+      Schema = mongoose.Schema;
+
+    var bookModel = new Schema({
+      title: {
+        type: String
+      },
+      author: { type: String },
+      genre: { type: String },
+      read: { type: Boolean, default: false }
+    });
+
+    module.exports = mongoose.model('Book', bookModel);
+  </code>
+
+# Now go and use this model on the API call on 'app.js'
+<code>
+  var bookRouter = express.Router();
+  bookRouter.route('/books')
+    .get(function(req, res) {
+
+      // BEGIN: code changes
+      Book.find(function(err, books) {
+        if(err) {
+          res.status(500).send(err);
+        } else {
+          res.json(books);
+        }
+      });
+      // END: code changes
+
+    });
+</code>
+
+# And type on the browser: 'localhost:8000/api/books'
+# it might return '[]' for you, which means that our database is empty.
+# Dont worry, we will create an insert function soon.
+
+
+______
+# Part 3.2
+
+  # Lets add some filter functionallity
+  # If you go to your browser and type 'localhost:8000/api/books?genre=Drama', express will parse those parameters after 'books?' into the
+  # request object so you can acess it by calling 'req.query'.
+  # We can send those parameters by adding it before the callback function of Book model, like "Book.find(req.query, function() {...});"
+  # To avoid people typing any type of thing and sendting unknow parameters to the database, we will refine the 'req.query' by doing something like this:
+  <code>
+    bookRouter.route('/books')
+      .get(function(req, res) {
+
+        var query = {};
+        if(req.query.genre) {
+          // only add the genre filter parameter if it exists on the URL
+          // if you type "books?batata=Something", the parameter 'batata' will not be passed to the query for the Book
+          query.genre = req.query.genre;
+        }
+
+        Book.find(query, function(err, books) {
+          if(err) {
+            res.status(500).send(err);
+          } else {
+            res.json(books);
+          }
+        });
+
+      });
+  </code>
+
