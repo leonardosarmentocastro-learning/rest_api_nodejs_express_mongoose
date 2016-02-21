@@ -39,8 +39,8 @@ ______
 # Gulp is just a task runner, so we need a plugin to do that refresh thing for us:
 > npm install gulp-nodemon --save
 
-# Now to make Gulp work, we are going to create a file named 'gulpfile.js' on '/book_api/' directory:
-> cd book_api && touch gulpfile.js
+# Now to make Gulp work, we are going to create a file named 'gulpfile.js' on 'book_api/' directory:
+> touch gulpfile.js
 
   <code>
     var gulp = require('gulp'),
@@ -63,3 +63,65 @@ ______
         });
     });
   </code>
+
+
+# Now that we have a automaticlly refresh task for us, start our server by running "gulp" on the "/book_api" directory:
+  > gulp
+
+
+# Go to your web browser and notice that going to 'localhost:3000' doesn't works anymore.
+# Try going to 'localhost:8000' and here it is!
+
+# Go to the app.js file and update the "Hello world" to whatever you want, save it and see that change refresh automatically by gulp.
+
+
+_____
+# Part 3
+
+  # Now we are going to write some HTTP verbs and routes to get some data.
+  # On 'app.js' file, lets add an router object which will handle our project routes:
+
+    <code>
+    // ...
+    var app = express();
+    var port = process.env.PORT || 3000;
+    // code above this will not be changed ...
+
+      // BEGIN: code to be added
+      var bookRouter = express.Router();
+      bookRouter.route('/books') // the route name is not case sensitive, if you put 'booKs' or 'Books' it will work either way by typing '/api/books'
+        .get(function(req, res) {
+          var responseJson = {
+            hello: "This is my api :)"
+          }
+
+          res.json(responseJson);
+        });
+
+      app.use('/api', bookRouter);
+      // END: code to be added
+
+    // code below will not be changed ...
+    // app.get('/', function(req, res) {
+    //   res.send("Hello world");
+    // });
+    // ...
+
+    </code>
+
+    # Now, with your gulp server running(if you forgot how to do it, type "cd book_api/ && gulp" on the terminal),
+    # go to your browser and submit 'localhost:8000/api/books' and see that it returns the json
+    {
+      hello: "this is my api :)"
+    }
+
+
+
+# Part 3.1
+  # Lets get data from a real database using MongoDB
+  # To connect to our DB and manage this data easily, we are going to use an ORM framework named 'mongoose'
+  # Now go to your terminal on the directory '/book_api' and add 'mongoose' to your package.json by doing:
+  > npm install mongoose --save
+
+
+  # The first thing we have to do, is to connect with our MongoDB
