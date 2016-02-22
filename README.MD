@@ -446,3 +446,4 @@ var bookRouter = require('./routes/book_routes.js')(Book); // now '(Book)' inste
 
     ----
     > npm install gulp-mocha should sinon --save
+    > npm install supertest gulp-env --save-dev
