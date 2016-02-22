@@ -242,3 +242,77 @@ ______
   > new ObjectId();
 
   # And copy and paste it
+
+_______
+# Part 4
+  # Now we are going to implement the post function which lets us add new books to our model.
+  # Go on 'app.js' on the 'book_api/' folder and just below the '/books' routes, chain a new http verbe method:
+
+  <code>
+    var bookRouter = express.Router();
+    bookRouter.route('/books')
+      // BEGIN: new code
+      .post(function (req, res) {
+        var book = new Book();
+
+
+      })
+      // END: new code
+      .get(function(req, res) {
+        //...
+  </code>
+
+  # Before we move on, in order to translate the client data received from the request, we need an middleware called "body-parser", which
+  will translate the json passed from the request to the Book model.
+  # Go to your console inside '/book_api' and tap:
+  > npm install body-parser --save
+
+  # Add that library to our 'app.js' and tells expressjs to use it on our app by doing:
+  <code>
+    var express = require('express'),
+    mongoose = require('mongoose'),
+    bodyParser = require('body-parser'); // ADD THE BODY PARSER LIBRARY
+
+
+    // ...
+      var app = express();
+      var port = process.env.PORT || 3000;
+
+      // BEGIN: new code
+      app.use(bodyParser.urlencoded({ extended: true }));
+      app.use(bodyParser.json());
+      // END: new code
+    // ...
+  </code>
+
+  # Now, we are almost done from inserting a new book.
+  # Go on and update the '.post' function code:
+  <code>
+    .post(function (req, res) {
+      var book = new Book(req.body); // This is where body-parser is working on
+
+      book.save();
+      res.status(201).send(book);
+    })
+  </code>
+
+  # Open up your postman, insert the url: "http://localhost:8000/api/books", on the headers "Content-Type":"application/json", method "POST"
+  # and on the body:
+  {
+    "title": "O pequeno príncipe",
+    "genre": "Drama",
+    "author": "Matheus Hayashi",
+    "read": false
+  }
+
+  # The request will return the newly created book with an id key, just like this:
+  {
+    "title": "O pequeno príncipe",
+    "genre": "Drama",
+    "author": "Matheus Hayashi",
+    "_id": "56ca51f7f8892fb7329d208b",
+    "read": false
+  }
+
+  # And now, to see that the was really created, change to method "GET" and the url "http://localhost:8000/api/books" and see your
+  # newly created book being returned.
