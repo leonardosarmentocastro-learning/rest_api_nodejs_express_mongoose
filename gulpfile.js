@@ -1,5 +1,6 @@
 var gulp = require('gulp'),
-  nodemon = require('gulp-nodemon');
+  nodemon = require('gulp-nodemon'),
+  gulpMocha = require('gulp-mocha');
 
 gulp.task('default', function() {
   var configuration = {
@@ -16,4 +17,9 @@ gulp.task('default', function() {
       // This is a log function which will be executed whenever a changes occur to our project
       console.log('> RESTARTING THE SERVER TO TEAR UP CHANGES');
     });
+});
+
+gulp.task('test', function() {
+  gulp.src('tests/*.js', { read: false })
+    .pipe( gulpMocha({ reporter: 'nyan' }) );
 });
