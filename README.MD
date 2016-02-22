@@ -442,3 +442,7 @@ var bookRouter = require('./routes/book_routes.js')(Book); // now '(Book)' inste
   # app.js
     // ..
     app.use('/api/books', bookRouter); // Instead of "app.use('/api', bookRouter);"
+
+
+    ----
+    > npm install gulp-mocha should sinon --save

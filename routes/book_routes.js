@@ -3,30 +3,11 @@ var express = require('express');
 // We are creating the 'book_routes.js' as a function because if we want to test it, we can inject our models on our function
 var routes = function(Book) {
   var bookRouter = express.Router();
-
+  var bookController = require('../controllers/book_controller')(Book);
 
   bookRouter.route('/')
-    .post(function (req, res) {
-      var book = new Book(req.body);
-
-      book.save();
-      res.status(201).send(book);
-    })
-    .get(function(req, res) {
-
-      var query = {};
-      if(req.query.genre) {
-        query.genre = req.query.genre;
-      }
-
-      Book.find(query, function(err, books) {
-        if(err) {
-          res.status(500).send(err);
-        } else {
-          res.json(books);
-        }
-      });
-    });
+    .post(bookController.post)
+    .get(bookController.get);
 
 
   // MIDDLEWARE (get the book by id before put/patch/delete)
