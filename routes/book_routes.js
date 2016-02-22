@@ -30,7 +30,6 @@ var routes = function(Book) {
 
 
   // MIDDLEWARE (get the book by id before put/patch/delete)
-  // TODO: avoid its use on DELETE
   bookRouter.use('/:bookId', function(req, res, next) {
     var bookId = req.params.bookId; // example: 56c9d11d3b6c8e7e9977b55d
     Book.findById(bookId, function (err, book) {
