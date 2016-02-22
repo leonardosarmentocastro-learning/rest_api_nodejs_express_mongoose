@@ -316,3 +316,129 @@ _______
 
   # And now, to see that the was really created, change to method "GET" and the url "http://localhost:8000/api/books" and see your
   # newly created book being returned.
+
+______
+# Part 4.1 - Cleaning up
+
+# Our 'app.js' is getting very big having a lot of responsabilities that it shouldn't have.
+# We can splice some things up on diferent files, by creating a "routes" folder and extracting the bookRouter from 'app.js' to a file named 'book_routes.js'
+> cd books_api
+> mkdir routes && cd routes/
+> touch book_routes.js
+
+# book_routes.js
+  <code>
+  var express = require('express');
+
+  // We are creating the 'book_routes.js' as a function because if we want to test it, we can inject our models on our function
+  var routes = function() {
+    var bookRouter = express.Router();
+
+
+    bookRouter.route('/books')
+      .post(function (req, res) {
+        var book = new Book(req.body);
+
+        book.save();
+        res.status(201).send(book);
+      })
+      .get(function(req, res) {
+
+        var query = {};
+        if(req.query.genre) {
+          query.genre = req.query.genre;
+        }
+
+        Book.find(query, function(err, books) {
+          if(err) {
+            res.status(500).send(err);
+          } else {
+            res.json(books);
+          }
+        });
+      });
+
+
+    bookRouter.route('/books/:bookId')
+      .get(function(req, res) {
+        var bookId = req.params.bookId; // example: 56c9d11d3b6c8e7e9977b55d
+        Book.findById(bookId, function (err, book) {
+          if(err) {
+            res.status(500).send(err);
+          } else {
+            res.json(book);
+          }
+        });
+      });
+
+
+    return bookRouter;
+  }
+
+  module.exports = routes;
+  </code>
+
+# app.js
+# Notice that we have extracted all of the bookRouter logic to a new file:
+  <code>
+    var express = require('express'),
+    mongoose = require('mongoose'),
+    bodyParser = require('body-parser');
+
+
+    var db = mongoose.connect("mongodb://localhost/bookAPI");
+    var Book = require('./models/bookModel');
+
+
+    var app = express();
+    var port = process.env.PORT || 3000;
+
+    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(bodyParser.json());
+
+
+    // BEGIN: new code
+    // we need to have a '()' after the require because we are exporting a function on 'module.exports' and our logic is inside that function
+    // in order to get it, we must execute it to get that function return
+    var bookRouter = require('./routes/book_routes.js')();
+    app.use('/api', bookRouter);
+    // END: new code
+
+    app.get('/', function(req, res) {
+      res.send("Hello world");
+    });
+
+    app.listen(port, function() {
+      console.log("Express.js server running on port: " + port);
+    });
+  </code>
+
+# If you try to test it on Postman, you will notice an error: "Book is not defined"
+# which means that the "book_routes.js" doesn't have any idea of what "Book"(model) is!
+# We need to inject it.
+
+# On 'book_routes.js', add the parameter 'Book' to your function
+# 'book_routes.js'
+var routes = function(Book) {
+  var bookRouter = express.Router();
+
+# On 'app.js', add the 'Book' model on the require call to the 'book_routes':
+# app.js
+var bookRouter = require('./routes/book_routes.js')(Book); // now '(Book)' instead of '()'
+
+# Go to postman and tries any of our routes and see that it is working like a charm.
+# The last refactor that we can do, is to let the 'app.use' take care of the routes naming.
+# on the 'book_routes.js', remove the 'books' text from the '/books' and '/books/:bookId' routes name
+  # 'book_routes.js'
+  // ...
+  bookRouter.route('/')
+    .post(function (req, res) {
+
+  // ..
+  bookRouter.route('/:bookId')
+
+
+  # and on 'app.js', modify the 'app.use' to handle that naming
+  # app.js
+    // ..
+    app.use('/api/books', bookRouter); // Instead of "app.use('/api', bookRouter);"
